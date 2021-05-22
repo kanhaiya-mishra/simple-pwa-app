@@ -8,6 +8,6 @@ app.get('/', function (req, res) {
     res.sendFile('index.html', { root: __dirname + '/public' });
 });
 
-var server = app.listen(8080, () => {
-    console.log("Started on http://localhost:8080");
+app.listen(process.env.PORT || 8080, () => {
+    console.log("Started on some port, maybe 8080");
 });
