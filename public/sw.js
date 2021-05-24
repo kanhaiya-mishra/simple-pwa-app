@@ -9,6 +9,7 @@ self.addEventListener('install', function (event) {
                 console.log('[Service Worker] PreCaching app shell ....');
                 cache.addAll([
                     '/',
+                    '/offline.html',
                     '/index.html',
                     '/src/js/app.js',
                     '/src/js/feed.js',
@@ -51,7 +52,12 @@ self.addEventListener('fetch', function (event) {
                                 return res;
                             })
                     })
-                    .catch(() => { });
+                    .catch((error) => {
+                        return caches.open(CACHE_STATIC_NAME)
+                            .then((cache) => {
+                                return cache.match('/offline.html');
+                            })
+                    });
             })
     );
 });
