@@ -1,5 +1,16 @@
-const CACHE_STATIC_NAME = 'static-v2';
+const CACHE_STATIC_NAME = 'static';
 const CACHE_DYNAMIC_NAME = 'dynamic';
+const STATIC_FILES = [
+    '/',
+    '/offline.html',
+    '/index.html',
+    '/src/js/app.js',
+    '/src/js/feed.js',
+    '/src/js/material.min.js',
+    '/src/css/app.css',
+    '/src/css/feed.css'
+];
+const MAX_ITEMS_IN_CACHE = 10;
 
 self.addEventListener('install', function (event) {
     console.log('[Service Worker] Installing Service Worker ...', event);
@@ -7,16 +18,7 @@ self.addEventListener('install', function (event) {
         caches.open(CACHE_STATIC_NAME)
             .then((cache) => {
                 console.log('[Service Worker] PreCaching app shell ....');
-                cache.addAll([
-                    '/',
-                    '/offline.html',
-                    '/index.html',
-                    '/src/js/app.js',
-                    '/src/js/feed.js',
-                    '/src/js/material.min.js',
-                    '/src/css/app.css',
-                    '/src/css/feed.css'
-                ]);
+                cache.addAll(STATIC_FILES);
             })
     );
 });
@@ -37,30 +39,74 @@ self.addEventListener('activate', function (event) {
     return self.clients.claim();
 });
 
-// self.addEventListener('fetch', function (event) {
-//     event.respondWith(
-//         caches.match(event.request)
-//             .then((response) => {
-//                 if (response) {
-//                     return response;
-//                 }
-//                 return fetch(event.request)
-//                     .then((res) => {
-//                         return caches.open(CACHE_DYNAMIC_NAME)
-//                             .then((cache) => {
-//                                 cache.put(event.request.url, res.clone());
-//                                 return res;
-//                             })
-//                     })
-//                     .catch((error) => {
-//                         return caches.open(CACHE_STATIC_NAME)
-//                             .then((cache) => {
-//                                 return cache.match('/offline.html');
-//                             })
-//                     });
-//             })
-//     );
-// });
+//Dynamic caching strategy
+
+// cache-first-then-network
+self.addEventListener('fetch', function (event) {
+
+    // Return from cache directly for static files
+    if (isInArray(event.request.url, STATIC_FILES)) {
+        event.respondWith(
+            caches.match(event.request)
+        );
+    } else {
+        event.respondWith(
+            caches.match(event.request)
+                .then((response) => {
+                    if (response) {
+                        return response;
+                    }
+                    return fetch(event.request)
+                        .then((res) => {
+                            return caches.open(CACHE_DYNAMIC_NAME)
+                                .then((cache) => {
+                                    cache.put(event.request.url, res.clone());
+                                    trimCache(CACHE_DYNAMIC_NAME, MAX_ITEMS_IN_CACHE)
+                                    return res;
+                                })
+                        })
+                        .catch((error) => {
+                            return caches.open(CACHE_STATIC_NAME)
+                                .then((cache) => {
+                                    // return offline html for help page only
+                                    // we dont want to return it for failed js, css, html files
+                                    // as we are not caching offline.html file, just doing this for it
+                                    if (event.request.headers.get('accept').includes('text/html')) {
+                                        return cache.match('/offline.html');
+                                    }
+                                })
+                        });
+                })
+        );
+    }
+
+});
+
+// Util functions
+
+function isInArray(string, array) {
+    var cachePath;
+    if (string.indexOf(self.origin) === 0) { // request targets domain where we serve the page from (i.e. NOT a CDN)
+        cachePath = string.substring(self.origin.length); // take the part of the URL AFTER the domain (e.g. after localhost:8080)
+    } else {
+        cachePath = string; // store the full request (for CDNs)
+    }
+    return array.indexOf(cachePath) > -1;
+}
+
+// Limit items in cache
+function trimCache(cacheName, maxItems) {
+    caches.open(cacheName)
+        .then((cache) => {
+            return cache.keys();
+        })
+        .then((keys) => {
+            if (keys.length > maxItems) {
+                cache.delete(keys[0])
+                    .then(() => trimCache(cacheName, maxItems));
+            }
+        })
+}
 
 // cache-only
 // self.addEventListener('fetch', function (event) {
@@ -77,12 +123,12 @@ self.addEventListener('activate', function (event) {
 // });
 
 // network-first-then-cache
-self.addEventListener('fetch', function (event) {
-    event.respondWith(
-        fetch(event.request)
-            .then(response => response)
-            .catch((err) => {
-                return caches.match(event.request);
-            })
-    );
-});
+// self.addEventListener('fetch', function (event) {
+//     event.respondWith(
+//         fetch(event.request)
+//             .then(response => response)
+//             .catch((err) => {
+//                 return caches.match(event.request);
+//             })
+//     );
+// });
