@@ -11,7 +11,7 @@ function writeData(storeName, data) {
             let store = tx.objectStore(storeName);
             store.put(data);
             return tx.complete;
-        })
+        });
 }
 
 function readAllData(storeName) {
@@ -20,5 +20,26 @@ function readAllData(storeName) {
             let tx = db.transaction(storeName, 'readonly');
             let store = tx.objectStore(storeName);
             return store.getAll();
+        });
+}
+
+function clearAllData(storeName) {
+    return dbPromise
+        .then((db) => {
+            let tx = db.transaction(storeName, 'readwrite');
+            let store = tx.objectStore(storeName);
+            store.clear();
+            return tx.complete;
+        });
+}
+
+function deleteItemFromStore(storeName, id) {
+    return dbPromise
+        .then((db) => {
+            let tx = db.transaction(storeName, 'readwrite');
+            let store = tx.objectStore(storeName);
+            store.delete(id);
+            return tx.complete;
         })
+        .then(() => console.log('Item deleted'));
 }
