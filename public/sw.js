@@ -1,4 +1,7 @@
-const CACHE_STATIC_NAME = 'static';
+importScripts('/src/js/idb.js');
+importScripts('/src/js/utility.js');
+
+const CACHE_STATIC_NAME = 'static-v1';
 const CACHE_DYNAMIC_NAME = 'dynamic';
 const STATIC_FILES = [
     '/',
@@ -6,10 +9,12 @@ const STATIC_FILES = [
     '/index.html',
     '/src/js/app.js',
     '/src/js/feed.js',
+    '/src/js/idb.js',
     '/src/js/material.min.js',
     '/src/css/app.css',
     '/src/css/feed.css'
 ];
+
 const MAX_ITEMS_IN_CACHE = 10;
 
 self.addEventListener('install', function (event) {
@@ -44,8 +49,21 @@ self.addEventListener('activate', function (event) {
 // cache-first-then-network
 self.addEventListener('fetch', function (event) {
 
-    // Return from cache directly for static files
-    if (isInArray(event.request.url, STATIC_FILES)) {
+    let url = "https://simple-pwa-app-d5c53-default-rtdb.firebaseio.com/posts"
+    if (event.request.url.indexOf(url) > -1) {
+        event.respondWith(fetch(event.request)
+            .then((res) => {
+                let clonedRes = res.clone();
+                clonedRes.json()
+                    .then((data) => {
+                        for (let key in data) {
+                            writeData('posts', data[key]);
+                        }
+                    })
+                return res;
+            }))
+    } else if (isInArray(event.request.url, STATIC_FILES)) {
+        // Return from cache directly for static files
         event.respondWith(
             caches.match(event.request)
         );
