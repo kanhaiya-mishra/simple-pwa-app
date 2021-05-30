@@ -4,11 +4,11 @@ var closeCreatePostModalButton = document.querySelector('#close-create-post-moda
 var sharedMomentsArea = document.querySelector('#shared-moments');
 
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
+  createPostArea.style.transform = 'translateY(0)';
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -79,7 +79,6 @@ if ('indexedDB' in window) {
       }
     })
 }
-
 
 // fetch('https://httpbin.org/get')
 //   .then(function (res) {
