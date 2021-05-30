@@ -24,9 +24,10 @@ function createCard(data) {
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.backgroundImage = 'url(' + data.image + ')';
   cardTitle.style.backgroundSize = 'cover';
-  cardTitle.style.height = '180px';
+  cardTitle.style.backgroundPosition = 'bottom';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
+  cardTitleTextElement.style.color = 'white';
   cardTitleTextElement.className = 'mdl-card__title-text';
   cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
