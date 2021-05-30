@@ -129,6 +129,40 @@ function trimCache(cacheName, maxItems) {
         })
 }
 
+// Sync event
+self.addEventListener('sync', function (event) {
+    console.log('[Service Worker] Background syncing', event);
+    if (event.tag === 'sync-new-posts') {
+        console.log('[Service Worker] Syncing new post');
+        event.waitUntil(
+            readAllData('sync-posts')
+                .then((data) => {
+                    for (let dt in data) {
+                        fetch("https://simple-pwa-app-d5c53-default-rtdb.firebaseio.com/posts.json", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: dt.id,
+                                title: dt.title,
+                                location: dt.location,
+                                image: 'https://firebasestorage.googleapis.com/v0/b/simple-pwa-app-d5c53.appspot.com/o/sf-boat.jpg?alt=media&token=7301991c-4431-4163-ad4a-242a024bff25'
+                            })
+                        })
+                            .then((res) => {
+                                console.log('Send data', res);
+                                if (res.ok) {
+                                    deleteItemFromStore('sync-posts', dt.id);
+                                }
+                            })
+                    }
+                })
+        )
+    }
+});
+
 // cache-only
 // self.addEventListener('fetch', function (event) {
 //     event.respondWith(
