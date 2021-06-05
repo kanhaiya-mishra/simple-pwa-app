@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "start-local": "http-server -c-1"
+    "start-local": "http-server -c-1",
+    "web-push": "web-push"
   },
   "keywords": [
     "pwa",
@@ -22,6 +23,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^5.12.13"
+    "mongoose": "^5.12.13",
+    "web-push": "^3.4.4"
   }
 }

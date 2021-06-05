@@ -21,12 +21,30 @@ function configurePushSub() {
         })
         .then((subscrptions) => {
             if (subscrptions === null) {
+                const vapidPublicKey = "BB7O5FaAHodo77WbDPk_W2Rr2hkNA7FpDpXe3VCA45VhzLme9h5ezOCUrU7r8DKs1eUGABKFxRUw7hz3zj3Ljqk";
+                const convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
                 //Create a new subscription
-                reg.pushManager.subscribe({
-                    userVisibleOnly: true
+                return reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: convertedVapidPublicKey
                 });
             } else {
                 //We have a subscription
+            }
+        })
+        .then((newSubscription) => {
+            return fetch(window.BACKEND_URL + "/subscription", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(newSubscription)
+            })
+        })
+        .then((res) => {
+            if (res.ok) {
+                displayConfirmNotification();
             }
         })
 }
@@ -67,8 +85,8 @@ function askForNotificationPermission() {
         if (result !== 'granted') {
             console.log("Oops!");
         } else {
-            displayConfirmNotification();
-            // configurePushSub();
+            // displayConfirmNotification();
+            configurePushSub();
         }
     });
 }

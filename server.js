@@ -17,6 +17,7 @@ mongoose.connection.on('error', () => {
 });
 
 require('./server/pwaPosts');
+require('./server/subscriptions');
 
 app.use(express.json());
 app.use(require('./server/route'));

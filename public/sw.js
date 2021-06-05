@@ -1,7 +1,9 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-const CACHE_STATIC_NAME = 'static-v';
+// const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = "https://simple-pwa-app-kanhaiya.herokuapp.com";
+const CACHE_STATIC_NAME = 'static-v1';
 const CACHE_DYNAMIC_NAME = 'dynamic';
 const STATIC_FILES = [
     '/',
@@ -49,7 +51,7 @@ self.addEventListener('activate', function (event) {
 // cache-first-then-network
 self.addEventListener('fetch', function (event) {
 
-    let url = "https://simple-pwa-app-kanhaiya.herokuapp.com/pwa-posts"
+    let url = BACKEND_URL + "/pwa-posts";
     if (event.request.url.indexOf(url) > -1) {
         event.respondWith(fetch(event.request)
             .then((res) => {
@@ -140,7 +142,7 @@ self.addEventListener('sync', function (event) {
             readAllData('sync-posts')
                 .then((data) => {
                     for (let dt of data) {
-                        fetch("https://simple-pwa-app-kanhaiya.herokuapp.com/pwa-posts", {
+                        fetch(BACKEND_URL + "/pwa-posts", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -199,10 +201,41 @@ self.addEventListener('notificationclick', (event) => {
         notification.close();
     } else {
         console.log(action);
+        event.waitUntil(
+            clients.matchAll()
+                .then((clis) => {
+                    const client = clis.find((c) => {
+                        return c.visibilityState === 'visible';
+                    });
+                    if (client) {
+                        client.navigate(notification.data.url);
+                        client.focus();
+                    } else {
+                        clents.openWindow(BACKEND_URL);
+                    }
+                })
+        );
+        notification.close();
     }
-
 });
 
-self.addEventListener('notificationclose', (event) => {
+self.addEventListener('push', (event) => {
+    console.log("Push Notification recieved");
+    let data = { title: "New!", content: "Something new happened", openURL: "/" };
+    if (event.data) {
+        data = JSON.parse(event.data.text());
+    }
 
+    var options = {
+        body: data.content,
+        icon: '/src/images/icons/app-icon-96x96.png',
+        badge: '/src/images/icons/app-icon-96x96.png',
+        data: {
+            url: data.openURL
+        }
+    }
+
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+    )
 });

@@ -49,7 +49,8 @@ function clearCards() {
   }
 }
 
-let jsonURL = "https://simple-pwa-app-kanhaiya.herokuapp.com/pwa-posts";
+let jsonURL = window.BACKEND_URL + "/pwa-posts";
+
 let networdDataRecieved = false;
 
 fetch(jsonURL)
