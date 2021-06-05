@@ -49,7 +49,7 @@ function clearCards() {
   }
 }
 
-let jsonURL = "https://simple-pwa-app-d5c53-default-rtdb.firebaseio.com/posts.json";
+let jsonURL = "https://simple-pwa-app-kanhaiya.herokuapp.com/pwa-posts";
 let networdDataRecieved = false;
 
 fetch(jsonURL)

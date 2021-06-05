@@ -49,7 +49,7 @@ self.addEventListener('activate', function (event) {
 // cache-first-then-network
 self.addEventListener('fetch', function (event) {
 
-    let url = "https://simple-pwa-app-d5c53-default-rtdb.firebaseio.com/posts"
+    let url = "https://simple-pwa-app-kanhaiya.herokuapp.com/pwa-posts"
     if (event.request.url.indexOf(url) > -1) {
         event.respondWith(fetch(event.request)
             .then((res) => {
@@ -117,13 +117,15 @@ function isInArray(string, array) {
 
 // Limit items in cache
 function trimCache(cacheName, maxItems) {
+    let localCache;
     caches.open(cacheName)
         .then((cache) => {
+            localCache = cache;
             return cache.keys();
         })
         .then((keys) => {
             if (keys.length > maxItems) {
-                cache.delete(keys[0])
+                localCache.delete(keys[0])
                     .then(() => trimCache(cacheName, maxItems));
             }
         })
@@ -137,8 +139,8 @@ self.addEventListener('sync', function (event) {
         event.waitUntil(
             readAllData('sync-posts')
                 .then((data) => {
-                    for (let dt in data) {
-                        fetch("https://simple-pwa-app-d5c53-default-rtdb.firebaseio.com/posts.json", {
+                    for (let dt of data) {
+                        fetch("https://simple-pwa-app-kanhaiya.herokuapp.com/pwa-posts", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -187,3 +189,20 @@ self.addEventListener('sync', function (event) {
 //             })
 //     );
 // });
+
+self.addEventListener('notificationclick', (event) => {
+    let notification = event.notification;
+    let action = event.action;
+
+    if (action === 'confirm') {
+        console.log('Confirm');
+        notification.close();
+    } else {
+        console.log(action);
+    }
+
+});
+
+self.addEventListener('notificationclose', (event) => {
+
+});
