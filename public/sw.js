@@ -3,8 +3,8 @@ importScripts('/src/js/utility.js');
 
 // const BACKEND_URL = "http://localhost:8080";
 const BACKEND_URL = "https://simple-pwa-app-kanhaiya.herokuapp.com";
-const CACHE_STATIC_NAME = 'static-v';
-const CACHE_DYNAMIC_NAME = 'dynamic-v';
+const CACHE_STATIC_NAME = 'static-v1';
+const CACHE_DYNAMIC_NAME = 'dynamic-v1';
 const STATIC_FILES = [
     '/',
     '/offline.html',
