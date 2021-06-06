@@ -16,8 +16,8 @@ mongoose.connection.on('error', () => {
     console.log("Error in connecting to Mongo DB");
 });
 
-require('./server/pwaPosts');
-require('./server/subscriptions');
+require('./server/pwaPost');
+require('./server/subscription');
 
 app.use(express.json());
 app.use(require('./server/route'));

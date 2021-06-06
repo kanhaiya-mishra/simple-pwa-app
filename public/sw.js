@@ -3,14 +3,15 @@ importScripts('/src/js/utility.js');
 
 // const BACKEND_URL = "http://localhost:8080";
 const BACKEND_URL = "https://simple-pwa-app-kanhaiya.herokuapp.com";
-const CACHE_STATIC_NAME = 'static-v1';
-const CACHE_DYNAMIC_NAME = 'dynamic';
+const CACHE_STATIC_NAME = 'static-v';
+const CACHE_DYNAMIC_NAME = 'dynamic-v';
 const STATIC_FILES = [
     '/',
     '/offline.html',
     '/index.html',
     '/src/js/app.js',
     '/src/js/feed.js',
+    '/src/js/utility.js',
     '/src/js/idb.js',
     '/src/js/material.min.js',
     '/src/css/app.css',
@@ -142,18 +143,17 @@ self.addEventListener('sync', function (event) {
             readAllData('sync-posts')
                 .then((data) => {
                     for (let dt of data) {
+                        let postData = new FormData();
+                        postData.append('id', dt.id);
+                        postData.append('title', dt.title);
+                        postData.append('location', dt.location);
+                        postData.append('file', dt.picture, dt.id + '.png');
+                        postData.append('rawLocationLat', dt.rawLocation.lat);
+                        postData.append('rawLocationLng', dt.rawLocation.lng);
+
                         fetch(BACKEND_URL + "/pwa-posts", {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                id: dt.id,
-                                title: dt.title,
-                                location: dt.location,
-                                image: 'https://firebasestorage.googleapis.com/v0/b/simple-pwa-app-d5c53.appspot.com/o/sf-boat.jpg?alt=media&token=7301991c-4431-4163-ad4a-242a024bff25'
-                            })
+                            body: postData
                         })
                             .then((res) => {
                                 console.log('Send data', res);

@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
-const pwaPosts = new mongoose.Schema({
+const pwaPost = new mongoose.Schema({
+    id: {
+        type: String,
+        default: ""
+    },
     image: {
         type: String,
         default: ""
@@ -13,10 +17,14 @@ const pwaPosts = new mongoose.Schema({
         type: String,
         default: ""
     },
+    rawLocation: {
+        type: Object,
+        default: {}
+    },
     createdOn: {
         type: Date,
         default: new Date()
     },
 })
 
-mongoose.model("PWAPosts", pwaPosts);
+mongoose.model("PWAPost", pwaPost);
